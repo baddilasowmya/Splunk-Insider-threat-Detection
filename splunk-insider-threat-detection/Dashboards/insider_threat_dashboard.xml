@@ -1,0 +1,109 @@
+<dashboard version="1.1" theme="light">
+  <label>Insider Threat Detection - UEBA</label>
+  <description>User behavior analytics dashboard for detecting insider threats</description>
+  <row>
+    <panel>
+      <chart>
+        <title>User Risk Leaderboard</title>
+        <search>
+          <query>index=windows
+| eval RiskScore=case(
+    Severity="Critical", 10,
+    Severity="High", 5,
+    Severity="Medium", 3,
+    Severity="Low", 1,
+    true(), 0)
+| stats sum(RiskScore) as TotalRisk by Username
+| sort -TotalRisk</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Off-Hours Login Activity Over Time</title>
+        <search>
+          <query>index=windows EventID=4624 AdditionalInfo="*OffHoursLogin=True*"
+| timechart span=1d count by Username</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Sensitive File Access by User</title>
+        <search>
+          <query>index=windows EventID=4663
+| search TargetObject="*Confidential*" OR TargetObject="*Salary*" OR TargetObject="*Restricted*" OR TargetObject="*Payroll*"
+| stats count as AccessCount by Username, TargetObject
+| sort -AccessCount</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>USB Device Insertion Events</title>
+        <search>
+          <query>index=windows EventID=6416
+| table Timestamp, Username, Computer, TargetObject
+| sort Timestamp</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Malicious Process Execution</title>
+        <search>
+          <query>index=windows EventID=4688
+| search ProcessName="mimikatz.exe" OR ProcessName="psexec.exe" OR ProcessName="wmic.exe"
+| table Timestamp, Username, Computer, ProcessName, AdditionalInfo
+| sort Timestamp</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <single>
+        <title>Audit Logs Cleared (Anti-Forensics)</title>
+        <search>
+          <query>index=windows EventID=1102
+| stats count as LogsClearedCount</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+  </row>
+</dashboard>
