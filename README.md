@@ -30,9 +30,12 @@ This project demonstrates insider threat detection using Splunk SIEM. It simulat
 ## Project Structure
 
 ```text
+splunk-insider-threat-detection
+|
 data/
 ├── insider_threat_logs.csv
 dashboards/
 └── insider_threat_dashboard.xml
+|__insider_threat_detection_-_ueab-2026-06-14.pdf
 playbooks/
 └── IR_Playbooks_Insider_Threat.docx
